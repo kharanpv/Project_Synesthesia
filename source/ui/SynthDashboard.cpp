@@ -1,6 +1,7 @@
 #include "SynthDashboard.h"
 
 #include "elements/ParamBox.h"
+#include "elements/KnobWidget.h"
 #include "elements/ToggleBox.h"
 #include "elements/WaveformSelector.h"
 #include "elements/TerminalStyle.h"
@@ -15,6 +16,7 @@ SynthDashboard::SynthDashboard(std::shared_ptr<SharedMatrix> matrix,
                                  std::shared_ptr<KeymapRouter> router)
     : dspMatrix(matrix), keyRouter(router),
       paramBox(std::make_unique<ParamBox>()),
+      knobWidget(std::make_unique<KnobWidget>()),
       toggleBox(std::make_unique<ToggleBox>()),
       waveformSelector(std::make_unique<WaveformSelector>()),
       waveformPanel(std::make_unique<WaveformPanel>()),
@@ -92,12 +94,30 @@ void SynthDashboard::drawLeftColumn(int currentWave) {
     }
     waveformSelector->draw(currentWave, waveHintPtrs);
 
-    // Parameter boxes
+    // Filter Cutoff knob
     auto cutoff = dspMatrix->tracks[0].params[P_FILTER_CUTOFF].load();
     std::string cutUp   = keyRouter->getKeyName(GrooveboxAction::CUTOFF_UP);
     std::string cutDown = keyRouter->getKeyName(GrooveboxAction::CUTOFF_DOWN);
     std::string cutHint = "[" + cutUp + "]/[" + cutDown + "]";
-    paramBox->draw("FILTER CUTOFF", cutoff, "Hz", cutHint);
+
+    // Normalize: 20Hz to 20kHz (logarithmic)
+    float normCutoff = (logf(cutoff) - logf(20.0f)) / (logf(20000.0f) - logf(20.0f));
+    if (normCutoff < 0.0f) normCutoff = 0.0f;
+    if (normCutoff > 1.0f) normCutoff = 1.0f;
+
+    char cutDisplay[32];
+    snprintf(cutDisplay, sizeof(cutDisplay), "%.2f Hz", cutoff);
+
+    static const KnobWidget::Marking cutoffMarkings[] = {
+        { "20Hz",    0.0f },
+        { "80Hz",    0.2f },
+        { "320Hz",   0.4f },
+        { "1.2kHz",  0.6f },
+        { "5kHz",    0.8f },
+        { "20kHz",   1.0f },
+    };
+    knobWidget->draw("FILTER CUTOFF", normCutoff, cutoffMarkings, 6,
+                     cutDisplay, cutHint.c_str());
 
     auto res = dspMatrix->tracks[0].params[P_FILTER_RES].load();
     std::string resUp   = keyRouter->getKeyName(GrooveboxAction::RES_UP);

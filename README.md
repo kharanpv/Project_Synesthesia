@@ -36,6 +36,8 @@ You will need CMake, Ninja, and the Clang compiler installed on your system.
   * Install CMake and Ninja via Homebrew: `brew install cmake ninja`.
 * **Linux (Debian/Ubuntu):**
   * Run: `sudo apt update && sudo apt install cmake ninja-build clang lld`
+  * Also install display dev libraries: `sudo apt install libegl-dev libgles-dev libwayland-dev libxkbcommon-dev wayland-protocols libx11-dev`
+  * See [Troubleshooting](documentation/Troubleshooting.md) if you encounter issues.
 
 ### Compilation
 

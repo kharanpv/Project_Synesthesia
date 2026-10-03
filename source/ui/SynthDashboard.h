@@ -7,6 +7,7 @@
 #include "../input/KeymapRouter.h"
 
 class ParamBox;
+class KnobWidget;
 class ToggleBox;
 class WaveformSelector;
 class WaveformPanel;
@@ -30,6 +31,7 @@ private:
 
     // Reusable component instances (owned via unique_ptr)
     std::unique_ptr<ParamBox>         paramBox;
+    std::unique_ptr<KnobWidget>       knobWidget;
     std::unique_ptr<ToggleBox>        toggleBox;
     std::unique_ptr<WaveformSelector> waveformSelector;
 

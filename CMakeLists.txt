@@ -36,6 +36,27 @@ set(SDL_STATIC ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(SDL2)
 
 # ---------------------------------------------------------
+# Fail-safe: Verify SDL2 was built with a usable video driver
+# ---------------------------------------------------------
+# After SDL2 is built, its generated SDL_config.h contains the detected video
+# backends. If none are compiled (e.g. missing Wayland/EGL/X11 dev libraries),
+# the binary will run but show no window. Fail at configure time instead.
+set(_SDL_CONFIG_FILE "${sdl2_BINARY_DIR}/SDL_config.h")
+if(EXISTS "${_SDL_CONFIG_FILE}")
+    file(READ "${_SDL_CONFIG_FILE}" _SDL_CONFIG_CONTENT)
+    if(NOT _SDL_CONFIG_CONTENT MATCHES "SDL_VIDEO_DRIVER_(WAYLAND|X11|KMSDRM|COCOA|WINDOWS) 1")
+        message(FATAL_ERROR
+            "SDL2 was built without a usable video driver.\n"
+            "The required display development libraries are not installed.\n"
+            "Install them and reconfigure:\n"
+            "  sudo apt install libegl-dev libgles-dev libwayland-dev libxkbcommon-dev wayland-protocols libx11-dev\n"
+            "  rm -rf build && cmake -S . -B build -G Ninja\n"
+            "See documentation/Troubleshooting.md for details."
+        )
+    endif()
+endif()
+
+# ---------------------------------------------------------
 # Target Configuration
 # ---------------------------------------------------------
 # 1. Dynamically scan the 'source' folder and subfolders for .cpp files
