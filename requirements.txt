@@ -1,0 +1,5 @@
+librosa==1.0.0
+Pillow==12.3.0
+numpy==2.5.3
+imageio-ffmpeg==0.6.0
+python-dotenv==1.2.4
